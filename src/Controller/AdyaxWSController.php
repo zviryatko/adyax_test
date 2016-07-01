@@ -174,7 +174,7 @@ class AdyaxWSController extends ControllerBase {
     } catch (AdyaxWSValidationErrorException $e) {
       return new JsonResponse(['errors' => $this->getErrorMessages($e)]);
     }
-    return new JsonResponse(['message' => $this->t('Node successfully saved.')]);
+    return new JsonResponse(['message' => $this->t('Node successfully saved.'), 'nid' => $node->id()]);
   }
 
   /**
