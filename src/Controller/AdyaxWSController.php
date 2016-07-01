@@ -88,7 +88,7 @@ class AdyaxWSController extends ControllerBase {
    */
   protected function validateDataFromRequest(Request $request) {
     try {
-      $data = $this->serializer->decode($request->getContent(), 'json');
+      $data = (array) $this->serializer->decode($request->getContent(), 'json', ['json_decode_associative' => TRUE]);
     } catch (\UnexpectedValueException $e) {
       throw new AdyaxWSValidationErrorException($this->t('Please, provide a valid json data.'));
     }
