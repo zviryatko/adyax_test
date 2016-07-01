@@ -1,0 +1,5 @@
+name: Adyax Test
+type: module
+description: Test task for Adyax company
+core: 8.x
+package: Adyax

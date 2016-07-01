@@ -1,0 +1,36 @@
+adyax_test.adyax_ws.get:
+  path: '/adyax_ws'
+  defaults:
+    _controller: 'adyax_test.adyax_ws_controller:getNode'
+    _format: 'json'
+  methods: [GET]
+  requirements:
+    _access: 'TRUE'
+    nid: \d+
+
+adyax_test.adyax_ws.post:
+  path: '/adyax_ws'
+  defaults:
+    _controller: 'adyax_test.adyax_ws_controller:postNode'
+    _format: 'json'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
+
+adyax_test.adyax_ws.put:
+  path: '/adyax_ws'
+  defaults:
+    _controller: 'adyax_test.adyax_ws_controller:putNode'
+    _format: 'json'
+  methods: [PUT]
+  requirements:
+    _access: 'TRUE'
+
+adyax_test.adyax_ws.delete:
+  path: '/adyax_ws'
+  defaults:
+    _controller: 'adyax_test.adyax_ws_controller:deleteNode'
+    _format: 'json'
+  methods: [DELETE]
+  requirements:
+    _access: 'TRUE'

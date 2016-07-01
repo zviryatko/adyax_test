@@ -1,0 +1,8 @@
+{
+  "name": "drupal/adyax_test",
+  "type": "drupal-module",
+  "description": "Test task for Adyax company",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "require": { }
+}

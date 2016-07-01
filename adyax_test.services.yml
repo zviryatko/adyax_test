@@ -1,0 +1,4 @@
+services:
+  adyax_test.adyax_ws_controller:
+    class: Drupal\adyax_test\Controller\AdyaxWSController
+    arguments: ['@entity_type.manager', '@serializer']
