@@ -2,8 +2,6 @@
 
 namespace Drupal\adyax_test\Tests;
 
-use Drupal\node\NodeInterface;
-use Drupal\node\NodeStorageInterface;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -14,7 +12,9 @@ use Drupal\simpletest\WebTestBase;
 class AdyaxWSControllerTest extends WebTestBase {
 
   /**
-   * @var NodeStorageInterface
+   * Node storage.
+   *
+   * @var \Drupal\node\NodeStorageInterface
    */
   protected $storage;
 
@@ -38,13 +38,15 @@ class AdyaxWSControllerTest extends WebTestBase {
   /**
    * Create request and get response data.
    *
-   * @param $method
+   * @param string $method
    *   HTTP request method.
-   * @param $nid
+   * @param int $nid
    *   The Node id.
    * @param array $data
    *   Post data.
+   *
    * @return array
+   *   Data decoded from response body.
    */
   protected function handleRequest($method, $nid = NULL, array $data = []) {
     $httpClient = \Drupal::httpClient();
@@ -65,6 +67,7 @@ class AdyaxWSControllerTest extends WebTestBase {
    * Returns test data for node.
    *
    * @return array
+   *   Simple test data.
    */
   protected function nodeTestData() {
     return [
@@ -77,7 +80,8 @@ class AdyaxWSControllerTest extends WebTestBase {
   /**
    * Create test node.
    *
-   * @return NodeInterface
+   * @return \Drupal\node\NodeInterface
+   *   Node with test data.
    */
   protected function createTestNode() {
     $data = $this->nodeTestData();
@@ -104,7 +108,7 @@ class AdyaxWSControllerTest extends WebTestBase {
   public function testPostNode() {
     $data = $this->nodeTestData();
     $response_data = $this->handleRequest('POST', NULL, $data);
-    /** @var NodeInterface $node */
+    /** @var \Drupal\node\NodeInterface $node */
     $node = $this->storage->load($response_data['nid']);
     $this->assertEqual($response_data['message'], t('Node successfully saved.'), 'Node saved message returns.');
     $this->assertNotNull($node, 'Node exists');
@@ -122,7 +126,7 @@ class AdyaxWSControllerTest extends WebTestBase {
     $data = $this->nodeTestData();
     $response_data = $this->handleRequest('PUT', $node->id(), $data);
     $this->assertEqual($response_data['message'], t('Node successfully updated.'), 'Node updated message returns.');
-    /** @var NodeInterface $node */
+    /** @var \Drupal\node\NodeInterface $node */
     $node_copy = $this->storage->loadUnchanged($node->id());
     $this->assertNotNull($node_copy, 'Node exists');
     $this->assertEqual($node_copy->title->value, $data['title'], 'Title is equal');
@@ -141,4 +145,5 @@ class AdyaxWSControllerTest extends WebTestBase {
     $node_copy = $this->storage->load($nid);
     $this->assertNull($node_copy, 'Node is deleted');
   }
+
 }

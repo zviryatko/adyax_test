@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\adyax_test\Controller\AdyaxWSValidationErrorException.
- */
 
 namespace Drupal\adyax_test\Controller;
 

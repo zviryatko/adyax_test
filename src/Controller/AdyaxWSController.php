@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\adyax_test\Controller\AdyaxWSController.
- */
 
 namespace Drupal\adyax_test\Controller;
 
@@ -10,11 +6,9 @@ use Drupal\Core\Controller\ControllerBase;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
-use Drupal\node\NodeStorageInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Class AdyaxWSController.
@@ -26,7 +20,7 @@ class AdyaxWSController extends ControllerBase {
   /**
    * The node storage service.
    *
-   * @var NodeStorageInterface
+   * @var \Drupal\node\NodeStorageInterface
    */
   protected $storage;
 
@@ -42,14 +36,15 @@ class AdyaxWSController extends ControllerBase {
    *
    * @var array
    */
-  protected $api_required_fields = ['title', 'type', 'body'];
+  protected $apiRequiredFields = ['title', 'type', 'body'];
 
   /**
    * Constructs a AdyaxWSController object.
    *
    * @param EntityTypeManagerInterface $entityTypeManager
-   *
+   *   Entity type manager.
    * @param Serializer $serializer
+   *   Serializer component.
    */
   public function __construct(EntityTypeManagerInterface $entityTypeManager, Serializer $serializer) {
     $this->storage = $entityTypeManager->getStorage('node');
@@ -60,8 +55,10 @@ class AdyaxWSController extends ControllerBase {
    * Return the node object from request.
    *
    * @param Request $request
+   *   Site request.
    *
    * @return NodeInterface
+   *   Node loaded from requested 'nid' query param.
    *
    * @throws AdyaxWSValidationErrorException
    */
@@ -81,19 +78,22 @@ class AdyaxWSController extends ControllerBase {
    * Get required fields from request.
    *
    * @param Request $request
+   *   Site request.
    *
    * @return array
+   *   Filtered and valid data from request.
    *
    * @throws AdyaxWSValidationErrorException
    */
   protected function validateDataFromRequest(Request $request) {
     try {
       $data = (array) $this->serializer->decode($request->getContent(), 'json', ['json_decode_associative' => TRUE]);
-    } catch (\UnexpectedValueException $e) {
+    }
+    catch (\UnexpectedValueException $e) {
       throw new AdyaxWSValidationErrorException($this->t('Please, provide a valid json data.'));
     }
-    $data = array_intersect_key($data, array_flip($this->api_required_fields));
-    foreach ($this->api_required_fields as $field) {
+    $data = array_intersect_key($data, array_flip($this->apiRequiredFields));
+    foreach ($this->apiRequiredFields as $field) {
       if (!array_key_exists($field, $data)) {
         throw new AdyaxWSValidationErrorException($this->t('Please, provide required fields: title, type and body.'));
       }
@@ -105,19 +105,21 @@ class AdyaxWSController extends ControllerBase {
    * Validate data in node, throws on validation error.
    *
    * @param NodeInterface $node
+   *   Node for validation.
    *
    * @return NodeInterface
+   *   Node with valid data for saving.
    *
    * @throws AdyaxWSValidationErrorException
    */
   protected function validateNode(NodeInterface $node) {
     $constraints = $node->validate();
-    $constraints->filterByFields($this->api_required_fields);
+    $constraints->filterByFields($this->apiRequiredFields);
     $violations = $constraints->getEntityViolations();
     if ($violations->count()) {
       $error = new AdyaxWSValidationErrorException();
       foreach ($violations as $violation) {
-        /** @var ConstraintViolationInterface $violation */
+        /** @var \Symfony\Component\Validator\ConstraintViolationInterface $violation */
         $error = new AdyaxWSValidationErrorException($violation->getMessage(), 0, isset($error) ? $error : NULL);
       }
       throw new $error;
@@ -129,8 +131,10 @@ class AdyaxWSController extends ControllerBase {
    * Collect exceptions to error messages array.
    *
    * @param AdyaxWSValidationErrorException $exception
+   *   Exceptions linked list.
    *
    * @return array
+   *   List of error messages.
    */
   protected function getErrorMessages(AdyaxWSValidationErrorException $exception) {
     $errors = [];
@@ -145,13 +149,16 @@ class AdyaxWSController extends ControllerBase {
    * Get node API callback.
    *
    * @param Request $request
+   *   Site request.
    *
    * @return JsonResponse
+   *   Json response with serialized node data or error messages.
    */
   public function getNode(Request $request) {
     try {
       $node = $this->getNodeFromRequest($request);
-    } catch (AdyaxWSValidationErrorException $e) {
+    }
+    catch (AdyaxWSValidationErrorException $e) {
       return new JsonResponse(['errors' => $this->getErrorMessages($e)]);
     }
     return new JsonResponse($this->serializer->normalize($node, 'json', ['plugin_id' => 'entity']));
@@ -161,8 +168,10 @@ class AdyaxWSController extends ControllerBase {
    * Insert node API callback.
    *
    * @param Request $request
+   *   Site request.
    *
    * @return JsonResponse
+   *   Json response with success or error messages.
    */
   public function postNode(Request $request) {
     try {
@@ -171,7 +180,8 @@ class AdyaxWSController extends ControllerBase {
       $node = $this->storage->create($data);
       $this->validateNode($node);
       $node->save();
-    } catch (AdyaxWSValidationErrorException $e) {
+    }
+    catch (AdyaxWSValidationErrorException $e) {
       return new JsonResponse(['errors' => $this->getErrorMessages($e)]);
     }
     return new JsonResponse(['message' => $this->t('Node successfully saved.'), 'nid' => $node->id()]);
@@ -181,8 +191,10 @@ class AdyaxWSController extends ControllerBase {
    * Update node API callback.
    *
    * @param Request $request
+   *   Site request.
    *
    * @return JsonResponse
+   *   Json response with success or error messages.
    */
   public function putNode(Request $request) {
     try {
@@ -193,7 +205,8 @@ class AdyaxWSController extends ControllerBase {
       }
       $this->validateNode($node);
       $node->save();
-    } catch (AdyaxWSValidationErrorException $e) {
+    }
+    catch (AdyaxWSValidationErrorException $e) {
       return new JsonResponse(['errors' => $this->getErrorMessages($e)]);
     }
     return new JsonResponse(['message' => $this->t('Node successfully updated.')]);
@@ -203,14 +216,17 @@ class AdyaxWSController extends ControllerBase {
    * Delete node API callback.
    *
    * @param Request $request
+   *   Site request.
    *
    * @return JsonResponse
+   *   Json response with success or error messages.
    */
   public function deleteNode(Request $request) {
     try {
       $node = $this->getNodeFromRequest($request);
       $node->delete();
-    } catch (AdyaxWSValidationErrorException $e) {
+    }
+    catch (AdyaxWSValidationErrorException $e) {
       return new JsonResponse(['errors' => $this->getErrorMessages($e)]);
     }
     return new JsonResponse(['message' => $this->t('Node successfully deleted.')]);
